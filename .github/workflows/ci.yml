@@ -78,6 +78,10 @@ jobs:
           ACCOUNT=${{ secrets.AWS_ACCOUNT_ID }}
           REGION=${{ secrets.AWS_REGION }}
 
+          echo "Replacing AWS account placeholders..."
+          find gitops/k8s -type f -exec sed -i "s|<AWS_ACCOUNT_ID>|${ACCOUNT}|g" {} +
+          echo "Updating image tags...
+
           for SERVICE in auth gateway orders order-service product-service user-service; do
             MANIFEST="gitops/k8s/backend/${SERVICE}.yml"
             sed -i "s|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${SERVICE}:.*|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${SERVICE}:${NEW_TAG}|g" $MANIFEST
