@@ -80,7 +80,7 @@ jobs:
 
           echo "Replacing AWS account placeholders..."
           find gitops/k8s -type f -exec sed -i "s|<AWS_ACCOUNT_ID>|${ACCOUNT}|g" {} +
-          echo "Updating image tags...
+          echo "Updating image tags..."
 
           for SERVICE in auth gateway orders order-service product-service user-service; do
             MANIFEST="gitops/k8s/backend/${SERVICE}.yml"
