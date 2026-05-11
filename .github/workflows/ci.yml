@@ -38,7 +38,7 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION | \
           docker login --username AWS \
           --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
-     
+
       - name: Build Docker Image
         run: |
           if [ "${{ matrix.service }}" == "frontend" ]; then
@@ -51,12 +51,11 @@ jobs:
 
           docker build \
             -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG \
-          $BUILD_PATH
-
+            $BUILD_PATH
 
       - name: Push Docker Image
         run: |
-          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ matrix.service }}:${{ github.sha }}
+          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ matrix.service }}:${IMAGE_TAG}
           echo "Pushing $IMAGE_URI"
           docker push $IMAGE_URI
 
@@ -78,22 +77,36 @@ jobs:
           ACCOUNT=${{ secrets.AWS_ACCOUNT_ID }}
           REGION=${{ secrets.AWS_REGION }}
 
+          echo "Current directory:"
+          pwd
+
+          echo "Listing repo:"
+          ls -R
+
           echo "Replacing AWS account placeholders..."
           find gitops/k8s -type f -exec sed -i "s|<AWS_ACCOUNT_ID>|${ACCOUNT}|g" {} +
+
           echo "Updating image tags..."
 
           for SERVICE in auth gateway orders order-service product-service user-service; do
             MANIFEST="gitops/k8s/backend/${SERVICE}.yml"
-            sed -i "s|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${SERVICE}:.*|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${SERVICE}:${NEW_TAG}|g" $MANIFEST
+
+            sed -i "s|image:.*${SERVICE}.*|image: ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${SERVICE}:${NEW_TAG}|g" $MANIFEST
           done
 
-          sed -i "s|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/frontend:.*|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/frontend:${NEW_TAG}|g" gitops/k8s/frontend/deployment.yml
+          sed -i "s|image:.*frontend.*|image: ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/frontend:${NEW_TAG}|g" gitops/k8s/frontend/deployment.yml
+
+          echo "DEBUG: Updated images"
+          grep -r "image:" gitops/k8s || true
 
       - name: Commit and push updated manifests
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add gitops/k8s/
-          git diff --staged --quiet || git commit -m "ci: update image tags to ${{ github.sha }}"
-          git push
 
+          git add gitops/k8s/
+          git status
+          git diff --staged
+
+          git commit -m "ci: update image tags to ${{ github.sha }}" || echo "No changes to commit"
+          git push
