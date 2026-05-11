@@ -65,6 +65,10 @@ resource "helm_release" "monitoring" {
 
   timeout          = 600
   create_namespace = false
+  cleanup_on_fail = true
+  force_update    = true
+  recreate_pods   = true
+
 
   values = [
     yamlencode({
