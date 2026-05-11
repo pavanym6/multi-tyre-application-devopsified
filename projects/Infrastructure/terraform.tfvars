@@ -27,9 +27,9 @@ node_group_name = "eks-node-group"
 instance_types = ["t3.medium"]
 capacity_type  = "ON_DEMAND"
 
-desired_size = 2
+desired_size = 4
 min_size     = 1
-max_size     = 2
+max_size     = 4
 
 disk_size = 30
 
