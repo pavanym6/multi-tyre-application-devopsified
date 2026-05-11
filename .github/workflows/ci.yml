@@ -79,21 +79,21 @@ jobs:
           REGION=${{ secrets.AWS_REGION }}
 
           echo "Replacing AWS account placeholders..."
-          find k8s -type f -exec sed -i "s|<AWS_ACCOUNT_ID>|${ACCOUNT}|g" {} +
+          find gitops/k8s -type f -exec sed -i "s|<AWS_ACCOUNT_ID>|${ACCOUNT}|g" {} +
           echo "Updating image tags..."
 
           for SERVICE in auth gateway orders order-service product-service user-service; do
-            MANIFEST="k8s/backend/${SERVICE}.yml"
+            MANIFEST="gitops/k8s/backend/${SERVICE}.yml"
             sed -i "s|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${SERVICE}:.*|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${SERVICE}:${NEW_TAG}|g" $MANIFEST
           done
 
-          sed -i "s|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/frontend:.*|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/frontend:${NEW_TAG}|g" k8s/frontend/deployment.yml
+          sed -i "s|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/frontend:.*|${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/frontend:${NEW_TAG}|g" gitops/k8s/frontend/deployment.yml
 
       - name: Commit and push updated manifests
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add k8s/
+          git add gitops/k8s/
           git diff --staged --quiet || git commit -m "ci: update image tags to ${{ github.sha }}"
           git push
 
