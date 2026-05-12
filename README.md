@@ -1,16 +1,12 @@
 ## Repository Structure
 
 ```
-DevOps-Practice-Guide/
-├── docs/
-│   ├── part1-system-design.md     # System design foundations (Part 1)
-│   ├── part2-workflow.md          # Full workflow with AIOps (Part 2)
-│   └── claude-setup.md            # Claude Code + MCP server setup
+Three-Tier-Application-AIOps/          
 ├── projects/
-│   ├── README.md                  # EKS deployment guide (Part 3)
+│   ├── README.md                  # EKS deployment guide 
 │   ├── boutique-microservices/    # The application (7 services)
 │   ├── Infrastructure/            # Terraform for AWS provisioning
-│   └── aiops-assistant/           # Bedrock Agent — Kira (Part 4)
+│   └── aiops-assistant/           # Bedrock Agent — Kira 
 ├── gitops/
 │   ├── argo-cd.yml                # ArgoCD Application manifest
 │   ├── kustomization.yml          # Kustomize entry point
